@@ -15,7 +15,7 @@ export const DisplayStatus: React.FC<Props> = ({ status }) => {
 };
 
 const SuccessStatus: React.FC<{ status: ISuccessStatus }> = ({ status }) => (
-	<div>{status.message}</div>
+	<div style={{ fontWeight: 'bold', color: 'green' }}>{status.message}</div>
 );
 
 const ErrorStatus: React.FC<{ status: IErrorStatus }> = ({ status }) => {
@@ -33,13 +33,18 @@ const ErrorStatus: React.FC<{ status: IErrorStatus }> = ({ status }) => {
 		message = 'Server is currently unavailable. Please try again later.';
 	} else if (status.error === 'empty') {
 		message = 'Please select files to submit';
+	} else if (status.error === 'unsupported_file') {
+		message =
+			'File extension is not supported. Only txt files are supported.';
+	} else if (status.error === 'invalid_content') {
+		message = 'File has invalid content.';
 	} else {
 		message = 'Something went wrong.';
 	}
 
 	return (
 		<div>
-			{message}
+			<span style={{ fontWeight: 'bold', color: 'red' }}>{message}</span>
 
 			{status.emails != null ? (
 				<ul>

@@ -4,6 +4,8 @@ import { DisplayStatus } from './components/DisplayStatus';
 import { IErrorStatus, ISuccessStatus } from './models';
 import { emailService, fileReaderService } from './service';
 
+import styles from './App.module.css';
+
 export const App: React.FC = () => {
 	const formRef = useRef<HTMLFormElement>(null);
 	const [status, setStatus] = useState<ISuccessStatus | IErrorStatus>();
@@ -22,16 +24,18 @@ export const App: React.FC = () => {
 
 		// read file contents
 		if (files !== undefined) {
-			const result = await Promise.all(
-				files.map(fileReaderService.getEmailsFromFile)
-			);
-
-			const emails = result.reduce((acc, i) => {
-				acc.push(...i);
-				return acc;
-			}, []);
-
 			try {
+				const result = await Promise.all(
+					files.map(fileReaderService.getEmailsFromFile)
+				);
+
+				const emails = result.reduce<string[]>((acc, i) => {
+					if (i.isSuccess) {
+						acc.push(...i.emails);
+					}
+					return acc;
+				}, []);
+
 				await emailService.sendEmails({
 					emails: emails,
 				});
@@ -43,10 +47,18 @@ export const App: React.FC = () => {
 				setFiles(undefined);
 				formRef.current?.reset();
 			} catch (err: any) {
+				debugger;
 				if (err.code === 20) {
 					setStatus({
 						isSuccess: false,
 						error: 'unavailable',
+					});
+					return;
+				} else if (err.isValidationError) {
+					setStatus({
+						isSuccess: false,
+						error: err.error,
+						emails: [err.data.fileName],
 					});
 					return;
 				}
@@ -66,11 +78,22 @@ export const App: React.FC = () => {
 	};
 
 	return (
-		<div>
-			<form ref={formRef} onSubmit={handleSubmit}>
+		<div className={styles['page']}>
+			<form
+				ref={formRef}
+				onSubmit={handleSubmit}
+				className={styles['form']}
+			>
 				<Upload onFilesSelect={handleFilesChange} />
-				{files != null ? <DisplaySelectedFiles files={files} /> : null}
-				<button>Send emails</button>
+
+				{files != null ? (
+					<>
+						<DisplaySelectedFiles files={files} />
+						<button className={styles['submit']}>
+							Send emails
+						</button>
+					</>
+				) : null}
 			</form>
 
 			<DisplayStatus status={status} />
