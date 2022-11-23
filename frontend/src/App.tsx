@@ -8,6 +8,7 @@ import styles from './App.module.css';
 
 export const App: React.FC = () => {
 	const formRef = useRef<HTMLFormElement>(null);
+	const [loading, setLoading] = useState(false);
 	const [status, setStatus] = useState<ISuccessStatus | IErrorStatus>();
 	const [files, setFiles] = useState<File[]>();
 
@@ -17,6 +18,7 @@ export const App: React.FC = () => {
 	};
 
 	const handleSubmit = async (event: FormEvent) => {
+		setLoading(true);
 		setStatus(undefined);
 
 		event.preventDefault();
@@ -68,6 +70,8 @@ export const App: React.FC = () => {
 					error: err.error,
 					emails: err.emails,
 				});
+			} finally {
+				setLoading(false);
 			}
 		} else {
 			setStatus({
@@ -89,12 +93,14 @@ export const App: React.FC = () => {
 				{files != null ? (
 					<>
 						<DisplaySelectedFiles files={files} />
-						<button className={styles['submit']}>
+						<button className={styles['submit']} disabled={loading}>
 							Send emails
 						</button>
 					</>
 				) : null}
 			</form>
+
+			{loading && <>Sending in progress...</>}
 
 			<DisplayStatus status={status} />
 		</div>
