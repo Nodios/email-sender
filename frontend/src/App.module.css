@@ -1,0 +1,24 @@
+.page {
+	display: flex;
+	min-height: 100vh;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.form {
+	width: 28rem;
+	max-width: 100%;
+	text-align: center;
+	position: relative;
+
+	margin-bottom: 10px;
+}
+
+.response {
+}
+
+.submit {
+	height: 3rem;
+	width: 26rem;
+}
